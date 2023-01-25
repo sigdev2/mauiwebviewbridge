@@ -7,9 +7,9 @@ namespace WebViewNativeApi
 {
     class NativeBridge
     {
-        private const string DEFAULT_SHEME = "native://";
+        private const string DEFAULT_SCHEME = "native://";
         private const string INTERFACE_JS = "window['createNativeBridgeProxy'] = " +
-            "(name, methods, properties, scheme = '" + DEFAULT_SHEME  + "') =>" +
+            "(name, methods, properties, scheme = '" + DEFAULT_SCHEME  + "') =>" +
             "{" +
             "    let apiCalls = new Map();" +
             "" +
@@ -85,7 +85,7 @@ namespace WebViewNativeApi
             _webView.Navigating += OnWebViewNavigatin;
         }
 
-        public void AddTarget(string name, Object obj, string sheme = DEFAULT_SHEME)
+        public void AddTarget(string name, Object obj, string sheme = DEFAULT_SCHEME)
         {
             _targets.Add((name, sheme), obj);
 
