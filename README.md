@@ -106,7 +106,7 @@ Limitations:
  - Due to the peculiarities of the interaction mechanism, the names of methods and properties can only be used in lowercase.
  - Returned objects must implement *JSON* serialization interface.
  - Accordingly, nested objects can only be data classes.
- - Due to the fact that `WebView::EvaluateJavaScriptAsync` can only accept one *JS* line, if the method returns an object that contains a newline chars after serialization or a string containing a newline chars, then this will cause an error. In this case, recommended that the return value be either cleared of newlines or encoded, for example, using **Base64** algorithm.
+ - Due to the fact that `WebView::EvaluateJavaScriptAsync` can only accept one *JS* line, if the method returns an object that contains a newline chars after serialization or a string containing a newline chars, then this will cause an error. In this case, recommended that the return value be either cleared of newlines or encoded, for example, with using **Base64** algorithm.
  - Mismatch of types and number of arguments in the call will result in an error.
  
 ## Licensing
