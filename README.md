@@ -1,6 +1,6 @@
 # MAUI WebView bridge from C# to JS
 
-One **.cs** file for add access to *CSharp* **native** objects in *MAUI* WebView *JavaScript* scripts for create *hybrid* *single-page applications* (**SPA**) without using *Blazor* and **any server side solutions**.
+One **.cs** file for add access to *CSharp* **native** objects in *MAUI* WebView *JavaScript* scripts for create *hybrid* *cross-platform* *single-page applications* (**SPA**) without using *Blazor* and **any server side solutions**.
 
 ## Mechanism
 
