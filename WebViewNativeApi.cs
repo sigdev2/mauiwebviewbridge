@@ -26,11 +26,9 @@ namespace WebViewNativeApi
             "" +
             "    return new Proxy({" +
             "            getArguments : (token) => {" +
-            "                debugger;" +
             "                return apiCalls.get(token).arguments;" +
             "            }," +
             "            returnValue : (token, value) => {" +
-            "                debugger;" +
             "                let ret = value;" +
             "                try { ret = JSON.parse(ret); } catch(e) { };" +
             "                let callback = apiCalls.get(token).success;" +
@@ -39,7 +37,6 @@ namespace WebViewNativeApi
             "                apiCalls.delete(token);" +
             "            }," +
             "            rejectCall : (token) => {" +
-            "                debugger;" +
             "                let callback = apiCalls.get(token).reject;" +
             "                if (callback && typeof callback === 'function')" +
             "                    callback();" +
@@ -52,7 +49,6 @@ namespace WebViewNativeApi
             "                    return new Proxy(() => {}, {" +
             "                        apply: (target, thisArg, argumentsList) => {" +
             "                            return new Promise((success, reject) => {" +
-            "                                    debugger;" +
             "                                    createRequest(prop, success, reject, argumentsList);" +
             "                                });" +
             "                        }" +
