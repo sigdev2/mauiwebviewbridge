@@ -102,7 +102,6 @@ Peculiarities:
  
 Limitations:
 
- - For *ID* of method calling used **UUIDv4** - may be collisions if there are a lot of concurrent calls.
  - Due to the peculiarities of the interaction mechanism, the names of methods and properties can only be used in lowercase.
  - Returned objects must implement *JSON* serialization interface.
  - Accordingly, nested objects can only be data classes.
