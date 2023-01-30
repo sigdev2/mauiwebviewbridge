@@ -13,13 +13,8 @@ namespace WebViewNativeApi
             "{" +
             "    let apiCalls = new Map();" +
             "" +
-            "    function uuidv4() {" +
-            "        return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>" +
-            "               (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16));" +
-            "    };" +
-            "" +
             "    function createRequest(target, success, reject, argumentsList) {" +
-            "        let uuid = uuidv4();" +
+            "        let uuid = crypto.randomUUID();" +
             "        while(apiCalls.has(uuid)) { uuid = uuidv4(); };" +
             "        apiCalls.set(uuid, { 'success': success, 'reject': reject, 'arguments': argumentsList });" +
             "        location.href = scheme + name + '/' + target + '/' + uuid + '/';" +
