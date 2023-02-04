@@ -15,7 +15,7 @@ namespace WebViewNativeApi
             "" +
             "    function createRequest(target, success, reject, argumentsList) {" +
             "        let uuid = crypto.randomUUID();" +
-            "        while(apiCalls.has(uuid)) { uuid = uuidv4(); };" +
+            "        while(apiCalls.has(uuid)) { uuid = crypto.randomUUID(); };" +
             "        apiCalls.set(uuid, { 'success': success, 'reject': reject, 'arguments': argumentsList });" +
             "        location.href = scheme + name + '/' + target + '/' + uuid + '/';" +
             "    }" +
