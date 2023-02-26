@@ -209,13 +209,13 @@ namespace WebViewNativeApi
                         await RunJS("window." + name + ".rejectCall('" + token + "');");
                     }
                 }
-            } catch (Exception ex)
+            } catch
             {
                 await RunJS("console.error('Internal error!'); window." + name + ".rejectCall('" + token + "');");
             }
         }
 
-        private Task<string> RunJS(string code)
+        public Task<string> RunJS(string code)
         {
             return _webView.Dispatcher.DispatchAsync(() =>
             {
