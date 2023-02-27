@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace WebViewNativeApi
 {
-    class NativeBridge
+    public class NativeBridge
     {
         private const string DEFAULT_SCHEME = "native://";
         private const string INTERFACE_JS = "window['createNativeBridgeProxy'] = " +
