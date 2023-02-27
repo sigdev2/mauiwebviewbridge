@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -9,7 +9,7 @@ namespace WebViewNativeApi
     {
         private const string DEFAULT_SCHEME = "native://";
         private const string INTERFACE_JS = "window['createNativeBridgeProxy'] = " +
-            "(name, methods, properties, scheme = '" + DEFAULT_SCHEME  + "') =>" +
+            "(name, methods, properties, scheme = '" + DEFAULT_SCHEME + "') =>" +
             "{" +
             "    let apiCalls = new Map();" +
             "" +
@@ -97,7 +97,8 @@ namespace WebViewNativeApi
                     AddTargetToWebView(entry.Key.Item1, entry.Value, entry.Key.Item2);
                 }
                 _isInit = true;
-            } else if (_query.Item4 != null)
+            }
+            else if (_query.Item4 != null)
             {
                 Task.Run(() =>
                 {
@@ -173,11 +174,19 @@ namespace WebViewNativeApi
                 MethodInfo method = type.GetMethod(prop);
                 if (method != null)
                 {
-                    Object[] arguments = new Object[jsonObjects.Length];
-                    foreach (ParameterInfo arg in method.GetParameters())
+                    var parameters = method.GetParameters();
+                    Object[] arguments = new Object[parameters.Length];
+                    foreach (ParameterInfo arg in parameters)
                     {
-                        JsonElement jsonObject = jsonObjects[arg.Position];
-                        arguments[arg.Position] = jsonObject.Deserialize(arg.ParameterType);
+                        if (jsonObjects.Length <= arg.Position)
+                        {
+                            arguments[arg.Position] = arg.DefaultValue;
+                        }
+                        else
+                        {
+                            JsonElement jsonObject = jsonObjects[arg.Position];
+                            arguments[arg.Position] = jsonObject.Deserialize(arg.ParameterType);
+                        }
                     }
 
                     Object result = method.Invoke(obj, arguments);
@@ -192,8 +201,8 @@ namespace WebViewNativeApi
                         }
                         serializedRet = JsonSerializer.Serialize(result);
                     }
-                    
-                    await RunJS("window." + name + ".returnValue('" + token + "', " + serializedRet  + ");");
+
+                    await RunJS("window." + name + ".returnValue('" + token + "', " + serializedRet + ");");
                 }
                 else
                 {
@@ -204,12 +213,14 @@ namespace WebViewNativeApi
                             propety.SetValue(obj, jsonObjects[0].Deserialize(propety.PropertyType));
                         string result = JsonSerializer.Serialize(propety.GetValue(obj, null));
                         await RunJS("window." + name + ".returnValue('" + token + "', " + result + ");");
-                    } else
+                    }
+                    else
                     {
                         await RunJS("window." + name + ".rejectCall('" + token + "');");
                     }
                 }
-            } catch
+            }
+            catch
             {
                 await RunJS("console.error('Internal error!'); window." + name + ".rejectCall('" + token + "');");
             }
