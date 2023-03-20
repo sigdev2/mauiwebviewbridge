@@ -1,6 +1,6 @@
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace WebViewNativeApi
@@ -220,10 +220,26 @@ namespace WebViewNativeApi
                     }
                 }
             }
-            catch
+            catch(Exception e)
             {
-                await RunJS("console.error('Internal error!'); window." + name + ".rejectCall('" + token + "');");
+                await RunJS("console.error('Internal error! (" + e.GetHashCode().ToString() + ")'); window." + name + ".rejectCall('" + token + "');");
             }
+        }
+
+        public async Task sendEvent(string type, Dictionary<string, string> detail = null, bool optBubbles = false, bool optCancelable = false, bool optComposed = false)
+        {
+            List<string> opts = new List<string>();
+            if (optBubbles)
+                opts.Add("bubbles: true");
+            if (optCancelable)
+                opts.Add("cancelable: true");
+            if (optComposed)
+                opts.Add("composed: true");
+            if (detail != null)
+                opts.Add("detail: " + JsonSerializer.Serialize(detail));
+
+            string optsStr = (opts.Count > 0 ? ", { " + String.Join(", ", opts) + " }" : "");
+            await RunJS("const nativeEvent = new CustomEvent('" + type + "'" + optsStr + "); document.dispatchEvent(nativeEvent);");
         }
 
         public Task<string> RunJS(string code)
