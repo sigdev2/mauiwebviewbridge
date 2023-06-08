@@ -79,12 +79,11 @@ namespace WebViewNativeApi
 
         public void AddTarget(string name, Object obj, string sheme = DEFAULT_SCHEME)
         {
+            if (obj == null)
+                return;
             _targets.Add((name, sheme), obj);
-
             if (_isInit)
-            {
                 AddTargetToWebView(name, obj, sheme);
-            }
         }
 
         private void OnWebViewInit(object sender, WebNavigatedEventArgs e)
@@ -93,48 +92,46 @@ namespace WebViewNativeApi
             {
                 RunJS(INTERFACE_JS);
                 foreach (KeyValuePair<(string, string), Object> entry in _targets)
-                {
                     AddTargetToWebView(entry.Key.Item1, entry.Value, entry.Key.Item2);
-                }
                 _isInit = true;
-            }
-            else if (_query.Item4 != null)
-            {
-                Task.Run(() =>
-                {
-                    RunCommand(_query.Item1, _query.Item2, _query.Item3, _query.Item4);
-                    _query = ("", "", "", null);
-                });
             }
         }
 
         private void OnWebViewNavigatin(object sender, WebNavigatingEventArgs e)
         {
-            if (_isInit)
+            if (!_isInit)
+                return;
+
+            foreach (KeyValuePair<(string, string), Object> entry in _targets)
             {
-                foreach (KeyValuePair<(string, string), Object> entry in _targets)
+                string startStr = entry.Key.Item2 + entry.Key.Item1;
+                if (!e.Url.StartsWith(startStr))
+                    continue;
+
+                string request = e.Url[(e.Url.IndexOf(startStr) + startStr.Length)..].ToLower();
+                request = request.Trim(new Char[] { '/', '\\' });
+                string[] requestArgs = request.Split('/');
+                if (requestArgs.Length < 2)
+                    return;
+                e.Cancel = true;
+
+                string prop = requestArgs[0];
+                string token = requestArgs[1];
+
+                Type type = entry.Value.GetType();
+                if (type.GetMember(prop) == null)
                 {
-                    string startStr = entry.Key.Item2 + entry.Key.Item1;
-                    if (e.Url.StartsWith(startStr))
-                    {
-                        string request = e.Url[(e.Url.IndexOf(startStr) + startStr.Length)..].ToLower();
-                        request = request.Trim(new Char[] { '/', '\\' });
-                        string[] requestArgs = request.Split('/');
-                        if (request.Length < 2)
-                            return;
-
-                        string prop = requestArgs[0];
-                        string token = requestArgs[1];
-
-                        Type type = entry.Value.GetType();
-                        if (type.GetMember(prop) == null)
-                            return;
-                        e.Cancel = true;
-
-                        _query = (entry.Key.Item1, token, prop, entry.Value);
-                        return;
-                    }
+                    RunJS("window." + entry.Key.Item1 + ".rejectCall('" + token + "', 'Member not found!');");
+                    return;
                 }
+
+                _query = (entry.Key.Item1, token, prop, entry.Value);
+                Task.Run(() =>
+                {
+                    RunCommand(_query.Item1, _query.Item2, _query.Item3, _query.Item4);
+                    _query = ("", "", "", null);
+                });
+                return;
             }
         }
 
@@ -144,13 +141,9 @@ namespace WebViewNativeApi
             List<string> methods = new List<string>();
             List<string> properties = new List<string>();
             foreach (MethodInfo method in type.GetMethods())
-            {
                 methods.Add(method.Name);
-            }
             foreach (PropertyInfo p in type.GetProperties())
-            {
                 properties.Add(p.Name);
-            }
 
             RunJS("window." + name + " = window.createNativeBridgeProxy('" + name + "', " + JsonSerializer.Serialize(methods) + ", " +
                 JsonSerializer.Serialize(properties) + ", '" + sheme + "');");
@@ -160,7 +153,6 @@ namespace WebViewNativeApi
         {
             Type attType = typeof(AsyncStateMachineAttribute);
             var attrib = (AsyncStateMachineAttribute)method.GetCustomAttribute(attType);
-
             return (attrib != null);
         }
 
@@ -216,7 +208,7 @@ namespace WebViewNativeApi
                     }
                     else
                     {
-                        await RunJS("window." + name + ".rejectCall('" + token + "');");
+                        await RunJS("window." + name + ".rejectCall('" + token + "', 'Member not found!');");
                     }
                 }
             }
@@ -252,14 +244,9 @@ namespace WebViewNativeApi
             {
                 string resultCode = code;
                 if (resultCode.Contains("\\n") || resultCode.Contains('\n'))
-                {
                     resultCode = "console.error('Called js from native api contain new line symbols!')";
-                }
                 else
-                {
                     resultCode = "try { " + resultCode + " } catch(e) { console.error(e); }";
-                }
-
                 return _webView.EvaluateJavaScriptAsync(resultCode);
             });
         }
