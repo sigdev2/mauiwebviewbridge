@@ -1,4 +1,4 @@
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.Json;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -32,10 +32,10 @@ namespace WebViewNativeApi
             "                    callback(ret);" +
             "                apiCalls.delete(token);" +
             "            }," +
-            "            rejectCall : (token) => {" +
+            "            rejectCall : (token, error) => {" +
             "                let callback = apiCalls.get(token).reject;" +
             "                if (callback && typeof callback === 'function')" +
-            "                    callback();" +
+            "                    callback(error);" +
             "                apiCalls.delete(token);" +
             "            }" +
             "        }," +
@@ -222,7 +222,11 @@ namespace WebViewNativeApi
             }
             catch(Exception e)
             {
-                await RunJS("console.error('Internal error! (" + e.GetHashCode().ToString() + ")'); window." + name + ".rejectCall('" + token + "');");
+                string error = e.Message + " (" + e.GetHashCode().ToString() + ")";
+                error = error.Replace("\\n", " ");
+                error = error.Replace("\n", " ");
+                error = error.Replace("\"", "&quot;");
+                await RunJS("window." + name + ".rejectCall('" + token + "', '" + error  + "');");
             }
         }
 
